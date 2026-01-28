@@ -6,11 +6,7 @@ import { Leaf } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 
-import {
-  LoginApi,
-  RegistrationApi,
-  GoogleLoginApi,
-} from "../../Redux/service/AllApi";
+import { LoginApi, RegistrationApi, GoogleLoginApi } from "../../Redux/service/AllApi";
 
 function Authentication({ register }) {
   const navigate = useNavigate();
@@ -35,23 +31,21 @@ function Authentication({ register }) {
       HANDLE AUTH SUCCESS
   ========================= */
   const handleAuthSuccess = (data) => {
-    // ബാക്കെൻഡിൽ നിന്ന് വരുന്ന 'user' ഒബ്‌ജക്റ്റ് എടുക്കുന്നു
     const userData = data.user;
     const token = data.token;
 
     if (!userData || !token) {
-      toast.error("ലോഗിൻ വിവരങ്ങൾ അപൂർണ്ണമാണ്");
+      toast.error("Authentication data is incomplete.");
       return;
     }
 
-    /** * ✅ ബാക്കെൻഡിൽ നിന്ന് ലഭിക്കുന്ന picture ഉൾപ്പെടെയുള്ള മുഴുവൻ 
-     * userData-യും sessionStorage-ൽ സേവ് ചെയ്യുന്നു.
-     */
+    // Save data to session storage
     sessionStorage.setItem("user", JSON.stringify(userData));
     sessionStorage.setItem("token", token);
 
     const role = userData.role;
 
+    // Role-based navigation
     if (role === "Admin") {
       navigate("/admin");
     } else if (role === "Seller") {
@@ -68,11 +62,11 @@ function Authentication({ register }) {
     e.preventDefault();
 
     if (register && !user.userName) {
-      return toast.warning("പേര് നൽകുക");
+      return toast.warning("Please enter your full name.");
     }
 
     if (!user.email || !user.password) {
-      return toast.warning("എല്ലാ കോളങ്ങളും പൂരിപ്പിക്കുക");
+      return toast.warning("Please fill in all fields.");
     }
 
     try {
@@ -85,7 +79,7 @@ function Authentication({ register }) {
       const result = await (register ? RegistrationApi(payload) : LoginApi(payload));
 
       if (result.status === 200 || result.status === 201) {
-        toast.success(result.data?.message || "വിജയിച്ചു");
+        toast.success(result.data?.message || "Action successful!");
 
         if (register) {
           setUser({ userName: "", email: "", password: "" });
@@ -96,9 +90,7 @@ function Authentication({ register }) {
       }
     } catch (error) {
       console.error("Auth Error:", error);
-      toast.error(
-        error.response?.data?.message || "സെർവർ എറർ. ബാക്കെൻഡ് ചെക്ക് ചെയ്യുക."
-      );
+      toast.error(error.response?.data?.message || "Server error. Please check your backend.");
     } finally {
       setLoading(false);
     }
@@ -112,38 +104,34 @@ function Authentication({ register }) {
       try {
         setLoading(true);
 
-        // 1. ഗൂഗിളിൽ നിന്ന് യൂസർ വിവരങ്ങൾ എടുക്കുന്നു
-        const userInfo = await axios.get(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          {
-            headers: {
-              Authorization: `Bearer ${tokenResponse.access_token}`,
-            },
-          }
-        );
+        // 1. Fetch user info from Google
+        const userInfo = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: {
+            Authorization: `Bearer ${tokenResponse.access_token}`,
+          },
+        });
 
-        // 2. ബാക്കെൻഡിലേക്ക് ചിത്രം (userInfo.data.picture) ഉൾപ്പെടെ അയക്കുന്നു
+        // 2. Send Google data to Backend
         const result = await GoogleLoginApi({
           email: userInfo.data.email,
           userName: userInfo.data.name,
           googleId: userInfo.data.sub,
-          picture: userInfo.data.picture, 
+          picture: userInfo.data.picture,
         });
 
         if (result.status === 200 || result.status === 201) {
-          toast.success(`സ്വാഗതം ${userInfo.data.name}`);
-          // റെസ്പോൺസിൽ ബാക്കെൻഡ് അയക്കുന്ന യൂസർ ഒബ്‌ജക്റ്റിൽ picture ഉണ്ടെന്ന് ഉറപ്പാക്കിയിട്ടുണ്ട്
+          toast.success(`Welcome ${userInfo.data.name}!`);
           handleAuthSuccess(result.data);
         }
       } catch (error) {
         console.error("Google Login Error:", error);
-        toast.error("ഗൂഗിൾ ലോഗിൻ പരാജയപ്പെട്ടു");
+        toast.error("Google Authentication failed.");
       } finally {
         setLoading(false);
       }
     },
     onError: () => {
-      toast.error("ഗൂഗിൾ ലോഗിൻ ക്യാൻസൽ ചെയ്തു");
+      toast.error("Google Login was cancelled.");
     },
   });
 
@@ -154,9 +142,7 @@ function Authentication({ register }) {
           <Leaf size={32} color="#10b981" />
         </div>
 
-        <h2 style={styles.title}>
-          {register ? "Join EcoMarket" : "Welcome Back"}
-        </h2>
+        <h2 style={styles.title}>{register ? "Join EcoMarket" : "Welcome Back"}</h2>
 
         <form onSubmit={handleSubmit}>
           {register && (
@@ -175,7 +161,7 @@ function Authentication({ register }) {
             style={styles.input}
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="Email Address"
             value={user.email}
             onChange={handleChange}
             required
@@ -191,10 +177,7 @@ function Authentication({ register }) {
               onChange={handleChange}
               required
             />
-            <span
-              style={styles.eye}
-              onClick={() => setShowPassword(!showPassword)}
-            >
+            <span style={styles.eye} onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
@@ -206,22 +189,17 @@ function Authentication({ register }) {
 
         <div style={styles.or}>OR</div>
 
-        <button
-          type="button"
-          style={styles.googleBtn}
-          onClick={() => googleLogin()}
-          disabled={loading}
-        >
-          <img 
-            src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png" 
-            alt="google" 
-            style={{width: '20px', marginRight: '10px'}}
+        <button type="button" style={styles.googleBtn} onClick={() => googleLogin()} disabled={loading}>
+          <img
+            src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png"
+            alt="google"
+            style={{ width: "20px", marginRight: "10px" }}
           />
           Continue with Google
         </button>
 
         <p style={styles.switch}>
-          {register ? "Already have an account?" : "New user?"}
+          {register ? "Already have an account?" : "New to EcoMarket?"}
           <Link to={register ? "/login" : "/register"} style={styles.link}>
             {register ? " Login" : " Register"}
           </Link>
@@ -233,13 +211,49 @@ function Authentication({ register }) {
 
 const styles = {
   container: { minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", background: "#ecfdf5" },
-  card: { background: "#fff", padding: "40px", width: "100%", maxWidth: "420px", borderRadius: "18px", boxShadow: "0 10px 40px rgba(0,0,0,0.1)" },
+  card: {
+    background: "#fff",
+    padding: "40px",
+    width: "100%",
+    maxWidth: "420px",
+    borderRadius: "18px",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
+  },
   logo: { textAlign: "center", marginBottom: "10px" },
   title: { textAlign: "center", marginBottom: "20px", color: "#333", fontWeight: "700" },
-  input: { width: "100%", padding: "12px", marginBottom: "15px", borderRadius: "10px", border: "1px solid #ddd", outline: "none" },
+  input: {
+    width: "100%",
+    padding: "12px",
+    marginBottom: "15px",
+    borderRadius: "10px",
+    border: "1px solid #ddd",
+    outline: "none",
+  },
   eye: { position: "absolute", right: "15px", top: "14px", cursor: "pointer", color: "#666" },
-  mainBtn: { width: "100%", padding: "12px", background: "#10b981", color: "#fff", border: "none", borderRadius: "10px", fontWeight: "bold", cursor: "pointer", transition: "0.3s" },
-  googleBtn: { width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #ddd", marginTop: "10px", cursor: "pointer", display: 'flex', alignItems: 'center', justifyContent: 'center', background: "#fff", fontWeight: "500" },
+  mainBtn: {
+    width: "100%",
+    padding: "12px",
+    background: "#10b981",
+    color: "#fff",
+    border: "none",
+    borderRadius: "10px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "0.3s",
+  },
+  googleBtn: {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "10px",
+    border: "1px solid #ddd",
+    marginTop: "10px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#fff",
+    fontWeight: "500",
+  },
   or: { textAlign: "center", margin: "15px 0", color: "#888", fontSize: "14px" },
   switch: { textAlign: "center", marginTop: "15px", color: "#666", fontSize: "14px" },
   link: { color: "#10b981", fontWeight: "bold", marginLeft: "5px", textDecoration: "none" },
