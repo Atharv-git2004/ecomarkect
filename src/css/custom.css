@@ -1,0 +1,77 @@
+/*
+   Eco-Marketplace Custom Styles
+   -----------------------------
+   Overrides Bootstrap default styles to match the Green Theme
+*/
+
+/* 1. കളർ പാലറ്റ് വേരിയബിളുകൾ (നിങ്ങളുടെ ഗ്രീൻ തീമിനായി) */
+:root {
+    --bs-primary: #1D5D42; /* കടും പച്ച - പ്രധാന ബട്ടണുകൾക്കും ഹെഡിംഗുകൾക്കും */
+    --bs-secondary: #6AAB7A; /* ഇളം പച്ച - ബാക്ക്ഗ്രൗണ്ടുകൾക്കും ഹൈലൈറ്റുകൾക്കും */
+    --bs-warning: #FFC107; /* മഞ്ഞ - 'Explore Now' ബട്ടണുകൾക്കും നോട്ടീസുകൾക്കും */
+    --bs-light: #F4F8F4; /* ഇളം ബാക്ക്ഗ്രൗണ്ട് */
+    --bs-text: #333333; /* സാധാരണ ടെക്സ്റ്റ് */
+}
+
+/* 2. ബോഡി സ്റ്റൈൽ */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--bs-text);
+    background-color: var(--bs-light);
+}
+
+/* 3. ബട്ടൺ ഓവർറൈഡുകൾ */
+/* പ്രൈമറി ബട്ടൺ പച്ചയിലേക്ക് മാറ്റുന്നു */
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #154530; /* അല്പം കടും പച്ച */
+    border-color: #154530;
+}
+
+/* 4. ഹെഡർ, കാർഡ് ഷാഡോ സ്റ്റൈലുകൾ */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* ഉൽപ്പന്ന കാർഡുകൾക്ക് മൃദുവായ ഷാഡോ */
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px); /* ഹോവർ ചെയ്യുമ്പോൾ ചെറിയ ഉയർച്ച */
+}
+
+/* 5. ഇക്കോ ബാഡ്ജ് (ഡിസൈനിലെ പച്ച ടാഗുകൾക്ക്) */
+/* നിങ്ങൾ ProductCard.jsx-ൽ ഉപയോഗിക്കുന്ന ക്ലാസ് */
+.eco-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: var(--bs-secondary);
+    color: #1D5D42; 
+    margin-top: 5px;
+}
+
+/* 6. അഡ്മിൻ/സെല്ലർ സൈഡ്ബാർ സ്റ്റൈലുകൾക്ക് (Optional) */
+.sidebar {
+    background-color: var(--bs-primary);
+    min-height: 100vh;
+    padding-top: 1rem;
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
+}
+
+.sidebar a:hover {
+    background-color: var(--bs-secondary);
+}
